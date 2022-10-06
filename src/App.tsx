@@ -10,9 +10,10 @@ import axios from 'axios';
 import {altKeyOnly, click, pointerMove} from 'ol/events/condition';
 import Overlay from 'ol/Overlay';
 import Select from 'ol/interaction/Select';
-import { Box, Divider, Drawer, List, ListItem, ListItemButton, ListItemIcon, ListItemText } from '@mui/material';
+import { Box, Divider, Drawer, FormControl, InputLabel, List, ListItem, ListItemButton, ListItemIcon, ListItemText, MenuItem, SelectChangeEvent, Select as MuiSelect } from '@mui/material';
 import InboxIcon from '@mui/icons-material/MoveToInbox';
 import MailIcon from '@mui/icons-material/Mail';
+import SolicitationsTable from './components/view/SolicitationsTable';
 
 type Anchor = 'top' | 'left' | 'bottom' | 'right';
 
@@ -21,6 +22,9 @@ function App() {
     const mapElement = useRef<any>();
     const mapRef = useRef();
     const [drawerOpen, setDrawerOpen] = useState<boolean>(false);
+    const [solicitationsData, setSolicitationsData] = useState<any[]>([])
+    const [imoveisData, setImoveisData] = useState<any[]>([])
+    const [currentBuilding, setCurrentBuilding] = useState<any>(null)
     
     mapRef.current = map;
 
@@ -148,257 +152,192 @@ function App() {
 
     useEffect(() => {
 
-        axios.get("http://localhost:8070/SC")
-        .then((response) => {
-            // const _geojsonObject = {
-            //     'type': 'FeatureCollection',
-            //     'crs': {
-            //       'type': 'name',
-            //       'properties': {
-            //         'name': 'EPSG:3857'
-            //       }
-            //     },
-            //     'features': [{"type": "Feature", "geometry": response.data["geometry"], "properties": response.data["properties"]}]
-            // };
+        axios.get("http://localhost:8070/imoveis")
+        .then((imoveisResponse) => {
 
-            const geojsonObject = {
-                'type': 'FeatureCollection',
-                'crs': {
-                  'type': 'name',
-                  'properties': {
-                    'name': 'EPSG:4674',
-                  },
-                },
-                'features': [
-                    {
-                        'type': 'Feature',
-                        'geometry': response.data["geometry"],
-                        "properties": response.data["properties"]
+            axios.get("http://localhost:8070/solicitacao")
+            .then((solicitationsResponse) => {
+                setSolicitationsData(solicitationsResponse.data["features"])
+                setImoveisData(imoveisResponse.data["features"])
+
+                const solicitationsGeojsonObject = {
+                    'type': 'FeatureCollection',
+                    'crs': {
+                      'type': 'name',
+                      'properties': {
+                        'name': 'EPSG:4674',
+                      },
                     },
-                    {
-                        "type": "Feature",
-                        "properties": {
-                            "nome": "Escola de Educação Básica Victor Hering"
-                        },
-                        "geometry": {
-                          "type": "Polygon",
-                          "coordinates": [
-                            [
-                              [
-                                -49.09093201160431,
-                                -26.90756680904838
-                              ],
-                              [
-                                -49.09071743488312,
-                                -26.907872962500463
-                              ],
-                              [
-                                -49.09057259559631,
-                                -26.907786856925988
-                              ],
-                              [
-                                -49.09044921398163,
-                                -26.907963851646738
-                              ],
-                              [
-                                -49.089269042015076,
-                                -26.907452001289798
-                              ],
-                              [
-                                -49.089301228523254,
-                                -26.907275005766593
-                              ],
-                              [
-                                -49.089531898498535,
-                                -26.906930581250432
-                              ],
-                              [
-                                -49.09093201160431,
-                                -26.90756680904838
+                    'features': [
+                        {
+                            "type": "Feature",
+                            "properties": {
+                                "nSolicitacao": "001",
+                                "tipoManutencao": "Elétrica",
+                                "status": "Aberto"
+                            },
+                            "geometry": {
+                              "type": "Point",
+                              "coordinates": [
+                                -48.519734144210815,
+                                -27.60110715979902
                               ]
-                            ]
-                          ]
-                        }
-                    }
-                  
-                ],
-            };
+                            }
+                          },
+                          {
+                            "type": "Feature",
+                            "properties": {
+                                "nSolicitacao": "002",
+                                "tipoManutencao": "Encanamento",
+                                "status": "Em andamento"
+                            },
+                            "geometry": {
+                              "type": "Point",
+                              "coordinates": [
+                                -48.51983070373535,
+                                -27.601649105160302
+                              ]
+                            }
+                          },
+                          {
+                            "type": "Feature",
+                            "properties": {
+                                "nSolicitacao": "003",
+                                "tipoManutencao": "Elétrica",
+                                "status": "Finalizado"
+                            },
+                            "geometry": {
+                              "type": "Point",
+                              "coordinates": [
+                                -48.51963758468628,
+                                -27.60135436327869
+                              ]
+                            }
+                          },
+                          {
+                            "type": "Feature",
+                            "properties": {
+                                "nSolicitacao": "001",
+                                "tipoManutencao": "Pintura",
+                                "status": "Em andamento"
+                            },
+                            "geometry": {
+                              "type": "Point",
+                              "coordinates": [
+                                -48.51954102516174,
+                                -27.60092651074969
+                              ]
+                            }
+                          }
+                      
+                    ],
+                };
+    
+                const vectorSource = new VectorSource({
+                    features: new GeoJSON().readFeatures(imoveisResponse.data),
+                });            
+                const vectorLayer = new VectorLayer({
+                    source: vectorSource,
+                    style: styleFunction,
+                });
+    
+                const solicitationsVectorSource = new VectorSource({
+                    features: new GeoJSON().readFeatures(solicitationsResponse.data),
+                });
+                const solicitationsVectorLayer = new VectorLayer({
+                    source: solicitationsVectorSource,
+                    style: styleFunction,
+                });
+    
+                const initialMap = new Map({
+                    target: mapElement.current,
+                    layers: [
+                        new TileLayer({
+                            source: new OSM(),
+                        }),
+                        vectorLayer,
+                    ],
+                    
+                    view: new View({
+                        center: [-50.45, -27.24],
+                        zoom: 8,
+                        projection: 'EPSG:4326',
+                    }),
+                });
+    
+    
+                const selected = new Style({
+                    fill: new Fill({
+                        color: 'rgba(255, 255, 255, 0)',
+                    }),
+                    stroke: new Stroke({
+                        color: 'rgba(255, 0, 0, 0.7)',
+                        width: 2,
+                    }),
+                });
+                
+                function selectStyle(feature:any) {
+                    const color = feature.get('COLOR') || 'rgba(255, 255, 255, 0)';
+                    selected.getFill().setColor(color);
+                    return selected;
+                }
+    
+                const selectClick = new Select({
+                    condition: click,
+                    style: selectStyle,
+                });
+                initialMap.addInteraction(selectClick);
+    
+                const highlightStyle = new Style({
+                    stroke: new Stroke({
+                      color: 'rgba(80, 80, 80, 1)',
+                      width: 2,
+                    }),
+                });
+                const featureOverlay:any = new VectorLayer({
+                    source: new VectorSource(),
+                    map: initialMap,
+                    style: highlightStyle,
+                });
+    
+                let highlight:any;
+                const displayFeatureInfo = function (pixel:any) {
+                    vectorLayer.getFeatures(pixel).then(function (features:any) {
+                        const feature = features.length ? features[0] : undefined;
 
-            const solicitationsGeojsonObject = {
-                'type': 'FeatureCollection',
-                'crs': {
-                  'type': 'name',
-                  'properties': {
-                    'name': 'EPSG:4674',
-                  },
-                },
-                'features': [
-                    {
-                        "type": "Feature",
-                        "properties": {
-                            "nSolicitacao": "001",
-                            "tipoManutencao": "Elétrica",
-                            "status": "Aberto"
-                        },
-                        "geometry": {
-                          "type": "Point",
-                          "coordinates": [
-                            -49.08987522125244,
-                            -26.907198467076025
-                          ]
-                        }
-                      },
-                      {
-                        "type": "Feature",
-                        "properties": {
-                            "nSolicitacao": "002",
-                            "tipoManutencao": "Encanamento",
-                            "status": "Em andamento"
-                        },
-                        "geometry": {
-                          "type": "Point",
-                          "coordinates": [
-                            -49.090567231178284,
-                            -26.90773423682035
-                          ]
-                        }
-                      },
-                      {
-                        "type": "Feature",
-                        "properties": {
-                            "nSolicitacao": "003",
-                            "tipoManutencao": "Elétrica",
-                            "status": "Finalizado"
-                        },
-                        "geometry": {
-                          "type": "Point",
-                          "coordinates": [
-                            -49.08946752548218,
-                            -26.90746635226601
-                          ]
-                        }
-                      },
-                      {
-                        "type": "Feature",
-                        "properties": {
-                            "nSolicitacao": "001",
-                            "tipoManutencao": "Pintura",
-                            "status": "Em andamento"
-                        },
-                        "geometry": {
-                          "type": "Point",
-                          "coordinates": [
-                            -49.089977145195,
-                            -26.90749027055563
-                          ]
-                        }
+                        setCurrentBuilding(feature)
+                        const info = document.getElementById('info') as HTMLElement;
+                        initialMap.addLayer(solicitationsVectorLayer)
+                        setDrawerOpen(true)
+                      if (features.length) {
+                        info.innerHTML = feature.get('nome') + ': ' + feature.get('nome');
+                        
+                      } else {
+                        info.innerHTML = '&nbsp;';
                       }
                   
-                ],
-            };
-
-            const vectorSource = new VectorSource({
-                features: new GeoJSON().readFeatures(geojsonObject),
-            });            
-            const vectorLayer = new VectorLayer({
-                source: vectorSource,
-                style: styleFunction,
-            });
-
-            const solicitationsVectorSource = new VectorSource({
-                features: new GeoJSON().readFeatures(solicitationsGeojsonObject),
-            });            
-            const solicitationsVectorLayer = new VectorLayer({
-                source: solicitationsVectorSource,
-                style: styleFunction,
-            });
-
-            const initialMap = new Map({
-                target: mapElement.current,
-                layers: [
-                    new TileLayer({
-                        source: new OSM(),
-                    }),
-                    vectorLayer,
-                ],
-                
-                view: new View({
-                    center: [-50.45, -27.24],
-                    zoom: 8,
-                    projection: 'EPSG:4326',
-                }),
-            });
-
-
-            const selected = new Style({
-                fill: new Fill({
-                    color: 'rgba(255, 255, 255, 0)',
-                }),
-                stroke: new Stroke({
-                    color: 'rgba(255, 0, 0, 0.7)',
-                    width: 2,
-                }),
-            });
-            
-            function selectStyle(feature:any) {
-                const color = feature.get('COLOR') || 'rgba(255, 255, 255, 0)';
-                selected.getFill().setColor(color);
-                return selected;
-            }
-
-            const selectClick = new Select({
-                condition: click,
-                style: selectStyle,
-            });
-            initialMap.addInteraction(selectClick);
-
-            const highlightStyle = new Style({
-                stroke: new Stroke({
-                  color: 'rgba(80, 80, 80, 1)',
-                  width: 2,
-                }),
-            });
-            const featureOverlay:any = new VectorLayer({
-                source: new VectorSource(),
-                map: initialMap,
-                style: highlightStyle,
-            });
-
-            let highlight:any;
-            const displayFeatureInfo = function (pixel:any) {
-                vectorLayer.getFeatures(pixel).then(function (features:any) {
-                  const feature = features.length ? features[0] : undefined;
-                  const info = document.getElementById('info') as HTMLElement;
-                  // let newMap = {...map}
-                    // map.addLayer(solicitationsVectorLayer)
-                    // setMap(newMap)
-                    initialMap.addLayer(solicitationsVectorLayer)
-                    setDrawerOpen(true)
-                  if (features.length) {
-                    info.innerHTML = feature.get('nome') + ': ' + feature.get('nome');
-                    
-                  } else {
-                    info.innerHTML = '&nbsp;';
-                  }
-              
-                  if (feature !== highlight) {
-                    if (highlight) {
-                      featureOverlay.getSource().removeFeature(highlight);
-                    }
-                    if (feature) {
-                      featureOverlay.getSource().addFeature(feature);
-                    }
-                    highlight = feature;
-                  }
+                      if (feature !== highlight) {
+                        if (highlight) {
+                          featureOverlay.getSource().removeFeature(highlight);
+                        }
+                        if (feature) {
+                          featureOverlay.getSource().addFeature(feature);
+                        }
+                        highlight = feature;
+                      }
+                    });
+                };
+                initialMap.on('click', function (evt) {
+                    displayFeatureInfo(evt.pixel);
                 });
-            };
-            initialMap.on('click', function (evt) {
-                displayFeatureInfo(evt.pixel);
-            });
+                setMap(initialMap);
+            })
+
+            
 
             // initialMap.addLayer(solicitationsVectorLayer)
 
-            setMap(initialMap);
+            
         })
 
         
@@ -425,21 +364,20 @@ function App() {
     };
 
     const getColorForStatus = (status:string) => {
-      if(status === "Aberto") {
-        return "red"
-      } else if(status === "Em andamento") {
-        return "yellow"
-      } else if(status === "Finalizado") {
-        return "green"
-      }
+        if(status === "Aberto") {
+            return "red"
+        } else if(status === "Em andamento") {
+            return "yellow"
+        } else if(status === "Finalizado") {
+            return "green"
+        }
     }
 
     const list = (anchor: Anchor) => (
-        <Box
-          sx={{ width: anchor === 'top' || anchor === 'bottom' ? 'auto' : 250 }}
-          role="presentation"
-          onClick={toggleDrawer(anchor, false)}
-          onKeyDown={toggleDrawer(anchor, false)}
+        <Box  sx={{ width: anchor === 'top' || anchor === 'bottom' ? 'auto' : 250 }}
+              role="presentation"
+              onClick={toggleDrawer(anchor, false)}
+              onKeyDown={toggleDrawer(anchor, false)}
         >
           <List>
             {["Escola de Educação Básica Victor Hering"].map((text, index) => (
@@ -478,17 +416,54 @@ function App() {
         </Box>
     );
 
+    const handleChange = (event: SelectChangeEvent) => {
+        const buildignName = event.target.value as string
+        const feature = imoveisData.find((imovelFeature) => imovelFeature["properties"]["nome"] === buildignName)
+        setCurrentBuilding(feature);
+    };
+
+    const filterSolicitationsByBuilding = () => {
+        if(currentBuilding&&currentBuilding["properties"]) {
+            return solicitationsData.filter((solicitationFeature) => solicitationFeature["properties"]["imovel_id"] === currentBuilding["properties"]["id"])
+        } else {
+            return []
+        }
+    }
+
     return (
         <div>
             {/* <div id="info">&nbsp;</div> */}
             <div style={{height:'100vh',width:'100%'}} ref={mapElement} className="map-container" />
             <Drawer
+                sx={{
+                        width: 1000,
+                        flexShrink: 0,
+                        '& .MuiDrawer-paper': {
+                            width: 1000,
+                            boxSizing: 'border-box',
+                        },
+                }}
                 anchor={"left"}
+                
                 open={drawerOpen}
                 variant="persistent"
                 onClose={toggleDrawer("left", false)}
             >
-                {list("left")}
+                {/* {list("left")} */}
+                <Box sx={{ minWidth: 120 }} style={{marginTop: 10}}>
+                    <FormControl fullWidth>
+                        <InputLabel id="imovel-select-label">Imóvel</InputLabel>
+                        <MuiSelect  labelId="imovel-select-label"
+                                    id="imovel-select-id"
+                                    value={currentBuilding&&currentBuilding["properties"]?currentBuilding["properties"]["nome"]:""}
+                                    label="Imóvel"
+                                    onChange={handleChange}
+                        >
+                            {imoveisData.map((imovelFeature) => <MenuItem value={imovelFeature["properties"]["nome"]}>{imovelFeature["properties"]["nome"]}</MenuItem>)}
+                        </MuiSelect>
+                    </FormControl>
+                </Box>
+                <SolicitationsTable solicitationsData={filterSolicitationsByBuilding()} />
             </Drawer>
         </div>
     );
