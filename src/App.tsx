@@ -168,13 +168,13 @@ function App() {
                     style: styleFunction,
                 });
     
-                const solicitationsVectorSource = new VectorSource({
-                    features: new GeoJSON().readFeatures(solicitationsResponse.data),
-                });
-                const solicitationsVectorLayer = new VectorLayer({
-                    source: solicitationsVectorSource,
-                    style: styleFunction,
-                });
+                // const solicitationsVectorSource = new VectorSource({
+                //     features: new GeoJSON().readFeatures(solicitationsResponse.data),
+                // });
+                // const solicitationsVectorLayer = new VectorLayer({
+                //     source: solicitationsVectorSource,
+                //     style: styleFunction,
+                // });
     
                 const initialMap = new Map({
                     target: mapElement.current,
@@ -231,7 +231,37 @@ function App() {
                 const displayFeatureInfo = (pixel:any) => {
                     vectorLayer.getFeatures(pixel).then((features:any) => {
                         const feature = features.length ? features[0] : undefined;
+                        const layers = initialMap.getLayers().getArray()
+
+                        initialMap.getLayers().forEach((layer:any) => {
+                            if (layer.get('name') && layer.get('name') == 'foobar'){
+                                initialMap.removeLayer(layer)
+                            }
+                        });
                         
+                        let featureCollection:any = {
+                            crs: solicitationsResponse.data["crs"],
+                            type: "FeatureCollection",
+                            features: []
+                        }
+
+                        for(let i=0; i<solicitationsResponse.data.features.length; i++) {
+                            if(solicitationsResponse.data.features[i].properties.imovel_id === feature.get("id")) {
+                                featureCollection.features.push(solicitationsResponse.data.features[i])
+                            }
+                            
+                        }
+
+                        const solicitationsVectorSource = new VectorSource({
+                            features: new GeoJSON().readFeatures(featureCollection),
+                            // features: new GeoJSON().readFeatures({"type": "FeatureCollection", "features": solicitationsData}),
+                            
+                        });
+                        const solicitationsVectorLayer = new VectorLayer({
+                            source: solicitationsVectorSource,
+                            style: styleFunction,
+                        });
+                        solicitationsVectorLayer.set('name', 'foobar')
                         
                         // let _imovelFeature = imoveisData.find((imovelFeature) => imovelFeature["properties"]["id"] === feature.get("id"))
                         let imovelFeature = {
