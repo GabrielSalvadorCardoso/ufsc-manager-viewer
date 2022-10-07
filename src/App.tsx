@@ -101,7 +101,7 @@ function App() {
     const styleSolicitations:any = {
         // "status": "Aberto" | "Em andamento" | "Finalizado"
 
-        'Aberto': new Style({
+        'JUSTIFICADA': new Style({
             image: new CircleStyle({
                 radius: 5,
                 fill: new Fill({
@@ -110,7 +110,7 @@ function App() {
                 stroke: new Stroke({color: 'red', width: 3}),
             })
         }),
-        'Em andamento': new Style({
+        'ANDAMENTO': new Style({
             image: new CircleStyle({
                 radius: 5,
                 fill: new Fill({
@@ -119,7 +119,7 @@ function App() {
                 stroke: new Stroke({color: 'yellow', width: 3}),
             })
         }),
-        'Finalizado': new Style({
+        'FINALIZADA': new Style({
             image: new CircleStyle({
                 radius: 5,
                 fill: new Fill({
@@ -131,9 +131,9 @@ function App() {
     };
 
     const styleFunction = function (feature:any) {
-        let status = feature.get("status")
-        if(status) {
-            return styleSolicitations[status]
+        let status = feature.get("historico_status")
+        if(status&&status.length>0) {
+            return styleSolicitations[status[status.length-1].status]
         }
 
         return styles[feature.getGeometry().getType()];
@@ -321,18 +321,16 @@ function App() {
         }
     }
 
-    console.log(currentBuilding)
-
     return (
         <div>
             {/* <div id="info">&nbsp;</div> */}
             <div style={{height:'100vh',width:'100%'}} ref={mapElement} className="map-container" />
             <Drawer
                 sx={{
-                        width: 1000,
+                        width: 700,
                         flexShrink: 0,
                         '& .MuiDrawer-paper': {
-                            width: 1000,
+                            width: 700,
                             boxSizing: 'border-box',
                         },
                 }}
