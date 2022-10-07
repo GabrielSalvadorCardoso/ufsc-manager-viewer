@@ -159,79 +159,6 @@ function App() {
             .then((solicitationsResponse) => {
                 setSolicitationsData(solicitationsResponse.data["features"])
                 setImoveisData(imoveisResponse.data["features"])
-
-                const solicitationsGeojsonObject = {
-                    'type': 'FeatureCollection',
-                    'crs': {
-                      'type': 'name',
-                      'properties': {
-                        'name': 'EPSG:4674',
-                      },
-                    },
-                    'features': [
-                        {
-                            "type": "Feature",
-                            "properties": {
-                                "nSolicitacao": "001",
-                                "tipoManutencao": "Elétrica",
-                                "status": "Aberto"
-                            },
-                            "geometry": {
-                              "type": "Point",
-                              "coordinates": [
-                                -48.519734144210815,
-                                -27.60110715979902
-                              ]
-                            }
-                          },
-                          {
-                            "type": "Feature",
-                            "properties": {
-                                "nSolicitacao": "002",
-                                "tipoManutencao": "Encanamento",
-                                "status": "Em andamento"
-                            },
-                            "geometry": {
-                              "type": "Point",
-                              "coordinates": [
-                                -48.51983070373535,
-                                -27.601649105160302
-                              ]
-                            }
-                          },
-                          {
-                            "type": "Feature",
-                            "properties": {
-                                "nSolicitacao": "003",
-                                "tipoManutencao": "Elétrica",
-                                "status": "Finalizado"
-                            },
-                            "geometry": {
-                              "type": "Point",
-                              "coordinates": [
-                                -48.51963758468628,
-                                -27.60135436327869
-                              ]
-                            }
-                          },
-                          {
-                            "type": "Feature",
-                            "properties": {
-                                "nSolicitacao": "001",
-                                "tipoManutencao": "Pintura",
-                                "status": "Em andamento"
-                            },
-                            "geometry": {
-                              "type": "Point",
-                              "coordinates": [
-                                -48.51954102516174,
-                                -27.60092651074969
-                              ]
-                            }
-                          }
-                      
-                    ],
-                };
     
                 const vectorSource = new VectorSource({
                     features: new GeoJSON().readFeatures(imoveisResponse.data),
@@ -301,20 +228,33 @@ function App() {
                 });
     
                 let highlight:any;
-                const displayFeatureInfo = function (pixel:any) {
-                    vectorLayer.getFeatures(pixel).then(function (features:any) {
+                const displayFeatureInfo = (pixel:any) => {
+                    vectorLayer.getFeatures(pixel).then((features:any) => {
                         const feature = features.length ? features[0] : undefined;
-
-                        setCurrentBuilding(feature)
-                        const info = document.getElementById('info') as HTMLElement;
+                        
+                        
+                        // let _imovelFeature = imoveisData.find((imovelFeature) => imovelFeature["properties"]["id"] === feature.get("id"))
+                        let imovelFeature = {
+                            "type": "Feature",
+                            "properties": {
+                                "id": feature.get("id"),
+                                "nome": feature.get("nome"),
+                            },
+                            "geometry": {
+                                "type": "Polygon",
+                                "coordinates": feature.getGeometry().getCoordinates()
+                            }
+                        }
+                        setCurrentBuilding(imovelFeature)
+                        // const info = document.getElementById('info') as HTMLElement;
                         initialMap.addLayer(solicitationsVectorLayer)
                         setDrawerOpen(true)
-                      if (features.length) {
-                        info.innerHTML = feature.get('nome') + ': ' + feature.get('nome');
+                    //   if (features.length) {
+                    //     info.innerHTML = feature.get('nome') + ': ' + feature.get('nome');
                         
-                      } else {
-                        info.innerHTML = '&nbsp;';
-                      }
+                    //   } else {
+                    //     info.innerHTML = '&nbsp;';
+                    //   }
                   
                       if (feature !== highlight) {
                         if (highlight) {
@@ -332,12 +272,6 @@ function App() {
                 });
                 setMap(initialMap);
             })
-
-            
-
-            // initialMap.addLayer(solicitationsVectorLayer)
-
-            
         })
 
         
@@ -373,49 +307,6 @@ function App() {
         }
     }
 
-    const list = (anchor: Anchor) => (
-        <Box  sx={{ width: anchor === 'top' || anchor === 'bottom' ? 'auto' : 250 }}
-              role="presentation"
-              onClick={toggleDrawer(anchor, false)}
-              onKeyDown={toggleDrawer(anchor, false)}
-        >
-          <List>
-            {["Escola de Educação Básica Victor Hering"].map((text, index) => (
-              <ListItem key={text} disablePadding>
-                <ListItemButton>
-                  <ListItemIcon>
-                    {index % 2 === 0 ? <InboxIcon /> : <MailIcon />}
-                  </ListItemIcon>
-                  <ListItemText primary={"Escola de Educação Básica Victor Hering"} />
-                </ListItemButton>
-              </ListItem>
-            ))}
-          </List>
-          <Divider />
-          <List>
-            {["Aberto", "Em andamento", "Finalizado"].map((text, index) => (
-              <ListItem key={text} disablePadding>
-                <ListItemButton>
-                  <ListItemIcon>
-                    {/* {index % 2 === 0 ? <InboxIcon /> : <MailIcon />} */}
-                    <div style={{
-                      backgroundColor: getColorForStatus(text),
-                      width: 25,
-                      height: 25,
-                      borderRadius: "50%",
-                      display: "flex"
-                      
-                      
-                  }}></div>
-                  </ListItemIcon>
-                  <ListItemText primary={text + (text === "Em andamento"?" (2)":"")} />
-                </ListItemButton>
-              </ListItem>
-            ))}
-          </List>
-        </Box>
-    );
-
     const handleChange = (event: SelectChangeEvent) => {
         const buildignName = event.target.value as string
         const feature = imoveisData.find((imovelFeature) => imovelFeature["properties"]["nome"] === buildignName)
@@ -429,6 +320,8 @@ function App() {
             return []
         }
     }
+
+    console.log(currentBuilding)
 
     return (
         <div>

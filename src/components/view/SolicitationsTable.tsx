@@ -9,11 +9,11 @@ const columns: GridColDef[] = [
     // { field: 'fullName', headerName: 'Full name', description: 'This column has a value getter and is not sortable.', sortable: false, width: 160, valueGetter: (params: GridValueGetterParams) => `${params.row.firstName || ''} ${params.row.lastName || ''}`, },
 
     { field: 'id', headerName: 'ID', width: 50 },
+    { field: 'data_abertura', headerName: 'Data Abertura', width: 250 },
     { field: 'numero_os', headerName: 'Número da OS', width: 70 },
     { field: 'tipo', headerName: 'Tipo', width: 100 },
     { field: 'natureza', headerName: 'Natureza', width: 100 },
     { field: 'responsavel', headerName: 'Responsável', width: 200 },
-    { field: 'data_abertura', headerName: 'Data Abertura', width: 200 },
     { field: 'interessado', headerName: 'Solicitante', width: 100 },
     { field: 'detalhamento', headerName: 'Descrição', width: 200 },
     { field: 'assunto', headerName: 'Assunto', width: 200 },
@@ -48,11 +48,11 @@ const SolicitationsTable = (props:SolicitationsTableProps) =>  {
         return props.solicitationsData.map((solicitationFeature:any) => {
             return {
                 id: solicitationFeature["properties"].id,
+                data_abertura: solicitationFeature["properties"].data_abertura,
                 numero_os: solicitationFeature["properties"].numero_os,
                 tipo: solicitationFeature["properties"].tipo,
                 natureza: solicitationFeature["properties"].natureza,
                 responsavel: solicitationFeature["properties"].responsavel,
-                data_abertura: solicitationFeature["properties"].data_abertura,
                 interessado: solicitationFeature["properties"].interessado,
                 detalhamento: solicitationFeature["properties"].detalhamento,
                 assunto: solicitationFeature["properties"].assunto,
