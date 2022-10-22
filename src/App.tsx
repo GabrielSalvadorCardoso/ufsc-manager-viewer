@@ -268,7 +268,7 @@ function App() {
                             "type": "Feature",
                             "properties": {
                                 "id": feature.get("id"),
-                                "nome": feature.get("nome"),
+                                "code": feature.get("cod"),
                             },
                             "geometry": {
                                 "type": "Polygon",
@@ -339,7 +339,7 @@ function App() {
 
     const handleChange = (event: SelectChangeEvent) => {
         const buildignName = event.target.value as string
-        const feature = imoveisData.find((imovelFeature) => imovelFeature["properties"]["nome"] === buildignName)
+        const feature = imoveisData.find((imovelFeature) => imovelFeature["properties"]["cod"] === buildignName)
         setCurrentBuilding(feature);
     };
 
@@ -376,11 +376,11 @@ function App() {
                         <InputLabel id="imovel-select-label">Imóvel</InputLabel>
                         <MuiSelect  labelId="imovel-select-label"
                                     id="imovel-select-id"
-                                    value={currentBuilding&&currentBuilding["properties"]?currentBuilding["properties"]["nome"]:""}
+                                    value={currentBuilding&&currentBuilding["properties"]?currentBuilding["properties"]["cod"]:""}
                                     label="Imóvel"
                                     onChange={handleChange}
                         >
-                            {imoveisData.map((imovelFeature) => <MenuItem value={imovelFeature["properties"]["nome"]}>{imovelFeature["properties"]["nome"]}</MenuItem>)}
+                            {imoveisData.map((imovelFeature) => <MenuItem value={imovelFeature["properties"]["cod"]}>{imovelFeature["properties"]["cod"]}</MenuItem>)}
                         </MuiSelect>
                     </FormControl>
                 </Box>
