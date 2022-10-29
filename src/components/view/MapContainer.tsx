@@ -4,10 +4,16 @@ import {Tile as TileLayer, Vector as VectorLayer} from 'ol/layer';
 import {altKeyOnly, click, pointerMove} from 'ol/events/condition';
 import {OSM, Vector as VectorSource} from 'ol/source';
 import GeoJSON from 'ol/format/GeoJSON';
-import {Circle as CircleStyle, Fill, Stroke, Style} from 'ol/style';
+import {Circle as CircleStyle, Fill, Stroke, Style, Icon} from 'ol/style';
 import { Map, View } from 'ol';
 import Select from 'ol/interaction/Select';
 import { getImoveisURI, getSolicitacaoURI } from "../../utils/serverPaths";
+import {defaults as defaultControls} from 'ol/control';
+import {createStringXY} from 'ol/coordinate';
+import MousePosition from 'ol/control/MousePosition';
+import greenMarker from "./assets/green-marker.png"
+import redMarker from "./assets/red-marker.png"
+import yellowMarker from "./assets/yellow-marker.png"
 
 type MapContainerProps = {
     imoveisData: any[],
@@ -35,33 +41,73 @@ const MapContainer = (props:MapContainerProps) => {
     const styleSolicitations:any = {
         // "status": "Aberto" | "Em andamento" | "Finalizado"
 
+        // 'JUSTIFICADA': new Style({
+        //     image: new CircleStyle({
+        //         radius: 5,
+        //         fill: new Fill({
+        //             color: 'red'
+        //         }),
+        //         stroke: new Stroke({color: 'red', width: 3}),
+        //     })
+        // }),
         'JUSTIFICADA': new Style({
-            image: new CircleStyle({
-                radius: 5,
-                fill: new Fill({
-                    color: 'red'
-                }),
-                stroke: new Stroke({color: 'red', width: 3}),
-            })
+            image: new Icon({
+                anchor: [0.5, 46],
+                scale: 0.03,
+                anchorXUnits: 'fraction',
+                anchorYUnits: 'pixels',
+                // src: "./assets/green-marker.png",
+                src: redMarker,
+                
+            }),
         }),
+
+        // 'ANDAMENTO': new Style({
+        //     image: new CircleStyle({
+        //         radius: 5,
+        //         fill: new Fill({
+        //             color: 'yellow'
+        //         }),
+        //         stroke: new Stroke({color: 'yellow', width: 3}),
+        //     })
+        // }),
         'ANDAMENTO': new Style({
-            image: new CircleStyle({
-                radius: 5,
-                fill: new Fill({
-                    color: 'yellow'
-                }),
-                stroke: new Stroke({color: 'yellow', width: 3}),
-            })
+            image: new Icon({
+                // anchor: [0.5, 46],
+                scale: 0.03,
+                anchorXUnits: 'fraction',
+                anchorYUnits: 'pixels',
+                // src: "./assets/green-marker.png",
+                src: yellowMarker,
+                
+            }),
         }),
+        
+        // 'FINALIZADA': new Style({
+        //     image: new CircleStyle({
+        //         radius: 5,
+        //         fill: new Fill({
+        //             color: 'green'
+        //         }),
+        //         stroke: new Stroke({color: 'green', width: 3}),
+        //     })
+        // }),
+
         'FINALIZADA': new Style({
-            image: new CircleStyle({
-                radius: 5,
-                fill: new Fill({
-                    color: 'green'
-                }),
-                stroke: new Stroke({color: 'green', width: 3}),
-            })
-        }),
+            image: new Icon({
+                anchor: [0.5, 46],
+                scale: 0.03,
+                anchorXUnits: 'fraction',
+                anchorYUnits: 'pixels',
+                // src: "./assets/green-marker.png",
+                src: greenMarker,
+                
+            }),
+        })
+
+
+
+        
     };
 
     const styles:any = {
@@ -158,6 +204,14 @@ const MapContainer = (props:MapContainerProps) => {
     
                 const initialMap = new Map({
                     target: mapElement.current,
+                    controls: defaultControls().extend([new MousePosition({
+                        coordinateFormat: createStringXY(10),
+                        projection: 'EPSG:4326',
+                        // comment the following two lines to have the mouse position
+                        // be placed within the map.
+                        className: 'custom-mouse-position',
+                        target: document.getElementById('mouse-position') as any,
+                      })]),
                     layers: [
                         new TileLayer({
                             source: new OSM(),
@@ -279,7 +333,11 @@ const MapContainer = (props:MapContainerProps) => {
     }, []);
     
     return (
-        <div style={{height:'100vh',width:'100%'}} ref={mapElement} className="map-container" />
+        <div>
+            <div style={{height:'100vh'}} ref={mapElement} className="map-container" />
+            <div id="mouse-position"></div>
+        </div>
+
     )
 }
 

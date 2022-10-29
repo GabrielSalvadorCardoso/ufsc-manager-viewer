@@ -36,56 +36,12 @@ function App() {
         setState({ ...state, [anchor]: open });
     };
 
-    // const handleChange = (event: SelectChangeEvent) => {
-    //     const buildignName = event.target.value as string
-    //     const feature = imoveisData.find((imovelFeature) => imovelFeature["properties"]["cod"] === buildignName)
-    //     setCurrentBuilding(feature);
-    // };
-
-    // const filterSolicitationsByBuilding = () => {
-    //     if(currentBuilding&&currentBuilding["properties"]) {
-    //         return solicitationsData.filter((solicitationFeature) => solicitationFeature["properties"]["imovel_id"] === currentBuilding["properties"]["id"])
-    //     } else {
-    //         return []
-    //     }
-    // }
-
     return (
         <div>
             <MapContainer   imoveisData={imoveisData} setImoveisData={setImoveisData}
                             solicitationsData={solicitationsData} setSolicitationsData={setSolicitationsData}
                             setDrawerOpen={setDrawerOpen} setCurrentBuilding={setCurrentBuilding}
                              />
-            {/* <Drawer
-                sx={{
-                        width: 700,
-                        flexShrink: 0,
-                        '& .MuiDrawer-paper': {
-                            width: 700,
-                            boxSizing: 'border-box',
-                        },
-                }}
-                anchor={"left"}
-                
-                open={drawerOpen}
-                variant="persistent"
-                onClose={toggleDrawer("left", false)}
-            >
-                <Box sx={{ minWidth: 120 }} style={{marginTop: 10}}>
-                    <FormControl fullWidth>
-                        <InputLabel id="imovel-select-label">Imóvel</InputLabel>
-                        <MuiSelect  labelId="imovel-select-label"
-                                    id="imovel-select-id"
-                                    value={currentBuilding&&currentBuilding["properties"]?currentBuilding["properties"]["cod"]:""}
-                                    label="Imóvel"
-                                    onChange={handleChange}
-                        >
-                            {imoveisData.map((imovelFeature) => <MenuItem value={imovelFeature["properties"]["cod"]}>{imovelFeature["properties"]["cod"]}</MenuItem>)}
-                        </MuiSelect>
-                    </FormControl>
-                </Box>
-                <SolicitationsTable solicitationsData={filterSolicitationsByBuilding()} />
-            </Drawer> */}
             <ResizableDrawer currentBuilding={currentBuilding} solicitationsData={solicitationsData}
                              imoveisData={imoveisData}
                              setCurrentBuilding={setCurrentBuilding} />
