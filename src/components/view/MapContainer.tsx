@@ -7,6 +7,7 @@ import GeoJSON from 'ol/format/GeoJSON';
 import {Circle as CircleStyle, Fill, Stroke, Style} from 'ol/style';
 import { Map, View } from 'ol';
 import Select from 'ol/interaction/Select';
+import { getImoveisURI, getSolicitacaoURI } from "../../utils/serverPaths";
 
 type MapContainerProps = {
     imoveisData: any[],
@@ -139,10 +140,10 @@ const MapContainer = (props:MapContainerProps) => {
 
     useEffect(() => {
 
-        axios.get("http://localhost:8070/imoveis")
+        axios.get(getImoveisURI())
         .then((imoveisResponse) => {
 
-            axios.get("http://localhost:8070/solicitacao")
+            axios.get(getSolicitacaoURI())
             .then((solicitationsResponse) => {
                 props.setSolicitationsData(solicitationsResponse.data["features"])
                 props.setImoveisData(imoveisResponse.data["features"])
