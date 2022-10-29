@@ -18,7 +18,7 @@ import yellowMarker from "./assets/yellow-marker.png"
 type MapContainerProps = {
     imoveisData: any[],
     solicitationsData: any[],
-    setDrawerOpen: (drawerOpen:boolean) => void,
+    // setDrawerOpen: (drawerOpen:boolean) => void,
     setCurrentBuilding: (buildingFeature:any) => void,
     setImoveisData: (imoveisFeatureCollection:any[]) => void,
     setSolicitationsData: (solicitationsFeatureCollection:any[]) => void,
@@ -104,9 +104,6 @@ const MapContainer = (props:MapContainerProps) => {
                 
             }),
         })
-
-
-
         
     };
 
@@ -191,6 +188,7 @@ const MapContainer = (props:MapContainerProps) => {
 
             axios.get(getSolicitacaoURI())
             .then((solicitationsResponse) => {
+                
                 props.setSolicitationsData(solicitationsResponse.data["features"])
                 props.setImoveisData(imoveisResponse.data["features"])
     
@@ -294,13 +292,15 @@ const MapContainer = (props:MapContainerProps) => {
                             source: solicitationsVectorSource,
                             style: styleFunction,
                         });
+                        // extent.getCenter(solicitationsVectorSource.getExtent())
+
                         solicitationsVectorLayer.set('name', 'foobar')
                         
                         let imovelFeature = {
                             "type": "Feature",
                             "properties": {
                                 "id": feature.get("id"),
-                                "code": feature.get("cod"),
+                                "cod": feature.get("cod"),
                             },
                             "geometry": {
                                 "type": "Polygon",
@@ -309,7 +309,10 @@ const MapContainer = (props:MapContainerProps) => {
                         }
                         props.setCurrentBuilding(imovelFeature)
                         initialMap.addLayer(solicitationsVectorLayer)
-                        props.setDrawerOpen(true)
+                        // https://stackoverflow.com/questions/34041570/open-layers-3-center-the-map-based-on-extent-on-vector-layer
+                        initialMap.getView().fit(solicitationsVectorSource.getExtent(), initialMap.getSize() as any);
+                        initialMap.getView().animate({zoom: 20});
+                        // props.setDrawerOpen(true)
                   
                       if (feature !== highlight) {
                         if (highlight) {

@@ -1,4 +1,4 @@
-import React, { useCallback } from "react";
+import React, { useCallback, useEffect } from "react";
 // import ListItemIcon from "@material-ui/core/ListItemIcon";
 
 // import InboxIcon from "@material-ui/icons/MoveToInbox";
@@ -43,6 +43,10 @@ const ResizableDrawer = (props:ResizableDrawerProps) => {
     const classes = useStyles();
     const [drawerWidth, setDrawerWidth] = React.useState(defaultDrawerWidth);
 
+    useEffect(() => {
+        console.log(props.currentBuilding)
+    }, [props.currentBuilding])
+
     const handleMouseDown = (e:any) => {
         document.addEventListener("mouseup", handleMouseUp, true);
         document.addEventListener("mousemove", handleMouseMove, true);
@@ -83,11 +87,14 @@ const ResizableDrawer = (props:ResizableDrawerProps) => {
                 <InputLabel id="imovel-select-label">Imóvel</InputLabel>
                 <MuiSelect  labelId="imovel-select-label"
                             id="imovel-select-id"
-                            value={props.currentBuilding&&props.currentBuilding["properties"]?props.currentBuilding["properties"]["cod"]:""}
+                            value={props.currentBuilding&&props.currentBuilding["properties"]?props.currentBuilding["properties"]["cod"]:"Nenhum imóvel selecionado"}
                             label="Imóvel"
                             onChange={handleChange}
                 >
-                    {props.imoveisData.map((imovelFeature) => <MenuItem value={imovelFeature["properties"]["cod"]}>{imovelFeature["properties"]["cod"]}</MenuItem>)}
+                    {props.imoveisData.map((imovelFeature) => {
+                        return <MenuItem value={imovelFeature["properties"]["cod"]}>{imovelFeature["properties"]["cod"]}</MenuItem>
+                        
+                    })}
                 </MuiSelect>
             </FormControl>
         </Box>
