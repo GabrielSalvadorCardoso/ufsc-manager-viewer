@@ -14,10 +14,16 @@ import MousePosition from 'ol/control/MousePosition';
 import greenMarker from "./assets/green-marker.png"
 import redMarker from "./assets/red-marker.png"
 import yellowMarker from "./assets/yellow-marker.png"
+import {
+    // addCoordinateTransforms,
+    // addProjection,
+    transform,
+} from 'ol/proj';
 
 type MapContainerProps = {
     imoveisData: any[],
     solicitationsData: any[],
+    currentBuilding: any,
     // setDrawerOpen: (drawerOpen:boolean) => void,
     setCurrentBuilding: (buildingFeature:any) => void,
     setImoveisData: (imoveisFeatureCollection:any[]) => void,
@@ -31,6 +37,35 @@ const MapContainer = (props:MapContainerProps) => {
     const [map, setMap] = useState<any>();
     const mapRef = useRef();
     mapRef.current = map;
+
+    // useEffect(() => {
+    //     // console.log("MapContainer.useEffect", props.currentBuilding)
+    //     if(mapRef && mapRef.current) {
+    //         // let layers = (mapRef.current as any).getLayers()
+    //         // let source = layers.getSource();
+    //         // console.log(vectorSource)
+
+    //         let featureCollection:any = {
+    //             crs: {
+    //                 "type": "name",
+    //                 "properties": {
+    //                     "name": "EPSG:4674"
+    //                 }
+    //             },
+    //             type: "FeatureCollection",
+    //             features: []
+    //         }
+    //         featureCollection.features.push(props.currentBuilding)
+
+    //         const vectorSource = new VectorSource({
+    //             features: new GeoJSON().readFeatures(featureCollection),   
+    //         });
+    //         (mapRef.current as any).getView().fit(vectorSource.getExtent(), (mapRef.current as any).getSize() as any);
+    //         (mapRef.current as any).getView().animate({zoom: 17});    
+    //         console.log(vectorSource)
+    //     }
+        
+    // }, [props.currentBuilding])
     
     const image = new CircleStyle({
         radius: 5,
@@ -181,6 +216,25 @@ const MapContainer = (props:MapContainerProps) => {
         return styles[feature.getGeometry().getType()];
     };
 
+    const transformFeatures = (featureCollectionJSON:any) => {
+        return featureCollectionJSON
+        let imovelFeature = {
+            "type": "Feature",
+            // "properties": {
+            //     "id": feature.get("id"),
+            //     "cod": feature.get("cod"),
+            // },
+            "geometry": {
+                "type": "Polygon",
+                "coordinates": []
+            }
+        }
+        for(let i=0; featureCollectionJSON["features"].length; i++) {
+            let geom = featureCollectionJSON["features"][i]["geometry"]["coordinates"]
+            imovelFeature["geometry"]["coordinates"] = transform(geom, 'EPSG:4674', 'EPSG:4326') as any
+        }
+    }
+
     useEffect(() => {
 
         axios.get(getImoveisURI())
@@ -191,10 +245,12 @@ const MapContainer = (props:MapContainerProps) => {
                 
                 props.setSolicitationsData(solicitationsResponse.data["features"])
                 props.setImoveisData(imoveisResponse.data["features"])
-    
+                const transformedFeatureCollection = transformFeatures(imoveisResponse.data)
                 const vectorSource = new VectorSource({
-                    features: new GeoJSON().readFeatures(imoveisResponse.data),
-                });            
+                    features: new GeoJSON(
+                        // {dataProjection: 'EPSG:4674'}
+                    ).readFeatures(transformedFeatureCollection),
+                });
                 const vectorLayer = new VectorLayer({
                     source: vectorSource,
                     style: styleFunction,
@@ -202,17 +258,17 @@ const MapContainer = (props:MapContainerProps) => {
     
                 const initialMap = new Map({
                     target: mapElement.current,
-                    controls: defaultControls().extend([new MousePosition({
-                        coordinateFormat: createStringXY(10),
-                        projection: 'EPSG:4326',
-                        // comment the following two lines to have the mouse position
-                        // be placed within the map.
-                        className: 'custom-mouse-position',
-                        target: document.getElementById('mouse-position') as any,
-                      })]),
+                    // controls: defaultControls().extend([new MousePosition({
+                    //     coordinateFormat: createStringXY(10),
+                    //     projection: 'EPSG:4674',
+                    //     // comment the following two lines to have the mouse position
+                    //     // be placed within the map.
+                    //     className: 'custom-mouse-position',
+                    //     target: document.getElementById('mouse-position') as any,
+                    //   })]),
                     layers: [
                         new TileLayer({
-                            source: new OSM(),
+                            source: new OSM({wrapX: false}),
                         }),
                         vectorLayer,
                     ],
@@ -223,7 +279,9 @@ const MapContainer = (props:MapContainerProps) => {
                         projection: 'EPSG:4326',
                     }),
                 });
-    
+
+                initialMap.getView().fit(vectorSource.getExtent(), initialMap.getSize() as any);
+                initialMap.getView().animate({zoom: 17});    
     
                 const selected = new Style({
                     fill: new Fill({
@@ -263,8 +321,6 @@ const MapContainer = (props:MapContainerProps) => {
                 const displayFeatureInfo = (pixel:any) => {
                     vectorLayer.getFeatures(pixel).then((features:any) => {
                         const feature = features.length ? features[0] : undefined;
-                        // const layers = initialMap.getLayers().getArray()
-
                         initialMap.getLayers().forEach((layer:any) => {
                             if (layer.get('name') && layer.get('name') == 'foobar'){
                                 initialMap.removeLayer(layer)
@@ -292,7 +348,6 @@ const MapContainer = (props:MapContainerProps) => {
                             source: solicitationsVectorSource,
                             style: styleFunction,
                         });
-                        // extent.getCenter(solicitationsVectorSource.getExtent())
 
                         solicitationsVectorLayer.set('name', 'foobar')
                         

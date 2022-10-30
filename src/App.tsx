@@ -9,40 +9,22 @@ import MapContainer from './components/view/MapContainer';
 import ResizableDrawer from './components/view/ResizableDrawer';
 
 type Anchor = 'top' | 'left' | 'bottom' | 'right';
-
+// 0050a0
 function App() {
     // const [drawerOpen, setDrawerOpen] = useState<boolean>(false);
     const [solicitationsData, setSolicitationsData] = useState<any[]>([])
     const [imoveisData, setImoveisData] = useState<any[]>([])
     const [currentBuilding, setCurrentBuilding] = useState<any>(null)
-    
-    // const [state, setState] = React.useState({
-    //     top: false,
-    //     left: false,
-    //     bottom: false,
-    //     right: false,
-    // });
-
-    // const toggleDrawer = (anchor: Anchor, open: boolean) =>
-    //     (event: React.KeyboardEvent | React.MouseEvent) => {
-    //     if (
-    //         event.type === 'keydown' &&
-    //         ((event as React.KeyboardEvent).key === 'Tab' ||
-    //         (event as React.KeyboardEvent).key === 'Shift')
-    //     ) {
-    //         return;
-    //     }
-
-    //     setState({ ...state, [anchor]: open });
-    // };
 
     return (
         <div>
             <MapContainer   imoveisData={imoveisData} setImoveisData={setImoveisData}
                             solicitationsData={solicitationsData} setSolicitationsData={setSolicitationsData}
                             // setDrawerOpen={setDrawerOpen}
+                            currentBuilding={currentBuilding}
                             setCurrentBuilding={setCurrentBuilding}
                              />
+
             <ResizableDrawer currentBuilding={currentBuilding} solicitationsData={solicitationsData}
                              imoveisData={imoveisData}
                              setCurrentBuilding={setCurrentBuilding} />
