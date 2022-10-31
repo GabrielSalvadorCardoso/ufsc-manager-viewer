@@ -163,11 +163,11 @@ const MapContainer = (props:MapContainerProps) => {
         }),
         'MultiPolygon': new Style({
             stroke: new Stroke({
-                color: 'blue',
-                width: 1,
+                color: 'black',
+                width: 3,
             }),
             fill: new Fill({
-                color: 'rgba(255, 255, 0, 0.0)',
+                color: 'rgba(0, 0, 0, 0.1)',
             }),
         }),
         'Polygon': new Style({

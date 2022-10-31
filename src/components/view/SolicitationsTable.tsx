@@ -58,18 +58,19 @@ const SolicitationsTable = (props:SolicitationsTableProps) =>  {
         
             <Box
                 sx={{
-                    height: 350,
+                    height: 250,
                     width: '100%',
                     '& .statusAndamento': {
-                        backgroundColor: '#FFFF0091',
+                        // backgroundColor: '#FFFF0091',
+                        backgroundColor: '#FFFF00FF',
                         color: "#000000",
                     },
                     '& .statusJustificada': {
-                        backgroundColor: '#ff000075',
+                        backgroundColor: '#ff0000FF',
                         color: "#000000",
                     },
                     '& .statusFinalizada': {
-                        backgroundColor: '#00FF0075',
+                        backgroundColor: '#00FF00FF',
                         color: "#000000",
                     },
                 }}

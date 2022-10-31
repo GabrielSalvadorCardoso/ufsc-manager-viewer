@@ -80,7 +80,7 @@ const ResizableDrawer = (props:ResizableDrawerProps) => {
     }
 
     return (
-        <Drawer className={classes.drawer} variant="permanent" PaperProps={{ style: { width: drawerWidth } }} >
+        <Drawer className={classes.drawer} variant="permanent" PaperProps={{ style: { width: drawerWidth, marginTop: 64 } }} >
         {/* <div className={classes.toolbar} /> */}
         <div onMouseDown={e => handleMouseDown(e)} className={classes.dragger} />
         <Box sx={{ minWidth: 120 }} style={{margin: 10}}>
@@ -115,13 +115,14 @@ const ResizableDrawer = (props:ResizableDrawerProps) => {
         </Box>
         <SolicitationsTable solicitationsData={filterSolicitationsByBuilding()} />
         <Divider />
+        <Typography>Legenda</Typography>
         <Box>
             <Typography style={{display: "flex", flexDirection: "row", verticalAlign: "baseline"}}> <RoomIcon style={{ color: 'green' }} /> FINALIZADA</Typography>
-        </Box>
-        <Box>
+        {/* </Box>
+        <Box> */}
             <Typography style={{display: "flex", flexDirection: "row", verticalAlign: "baseline"}}> <RoomIcon style={{ color: 'yellow' }} /> ANDAMENTO</Typography>
-        </Box>
-        <Box>
+        {/* </Box>
+        <Box> */}
             <Typography style={{display: "flex", flexDirection: "row", verticalAlign: "baseline"}}> <RoomIcon style={{ color: 'red' }} /> JUSTIFICADA</Typography>
         </Box>
         <Divider />
